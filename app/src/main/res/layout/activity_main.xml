@@ -45,4 +45,12 @@
         android:layout_alignLeft="@+id/locationSwitch"
         android:layout_alignStart="@+id/locationSwitch" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Test"
+        android:id="@+id/testButton"
+        android:layout_alignTop="@+id/textView"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

@@ -30,6 +30,7 @@ public class SocketManager {
             socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             socket.on(Constants.RECEIVE_LOCATION_UPDATE, receiveLocationUpdate);
+            socket.on(Constants.USER_JOINED, receiveUserJoinedUpdate);
             socket.connect();
         }
     }
@@ -68,6 +69,10 @@ public class SocketManager {
         }
     }
 
+    public void addUser(String username){
+        //Toast.makeText(activity, "sending", Toast.LENGTH_LONG).show();
+        socket.emit(Constants.ADD_USER,"riley");
+    }
 
     /**
      * Received JSON from server of user locations in the format:
@@ -81,7 +86,7 @@ public class SocketManager {
      *          {
      *            username : Kahtaf,
      *            latitude : 43.741866,
-     *            longitude : -79.3072776
+     *             longitude : -79.3072776
      *          },
      *          ...
      *     ]
@@ -95,23 +100,41 @@ public class SocketManager {
                 public void run() {
                     try{
                         JSONObject data = (JSONObject) args[0];
-                        JSONArray userData = data.optJSONArray("locations");
-                        if (userData != null) {
-                            for (int x = 0; x < data.length(); x++) {
-                                String username = userData.getJSONObject(x).optString("username", null);
-                                String latitude = userData.getJSONObject(x).optString("latitude", null);
-                                String longitude = userData.getJSONObject(x).optString("longitude", null);
-
-                                // Do something with this data
-                            }
-                        }
-                    } catch (JSONException e) {
+                        String un = data.opt("username").toString();
+                        String latitude = data.opt("latitude").toString();
+                        String longitude = data.opt("longitude").toString();
+                        String message = String.format(Dictionary.USER_POSITION_BROADCAST,un,latitude,longitude);
+                        Toast.makeText(activity,message,Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             });
         }
     };
+
+    private Emitter.Listener receiveUserJoinedUpdate = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        JSONObject data = (JSONObject) args[0];
+                        String un = data.opt("username").toString();
+                        if(un!=null) {
+                            String userJoinedMessage = String.format(Dictionary.USER_JOINED, un);
+                            Toast.makeText(activity, userJoinedMessage, Toast.LENGTH_LONG).show();
+                        }
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
+
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
@@ -120,7 +143,7 @@ public class SocketManager {
                 @Override
                 public void run() {
                     if (!isConnected) {
-                        Toast.makeText(activity, "Connected to web server", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, Dictionary.CONNECTED_TO_SERVER, Toast.LENGTH_LONG).show();
                         isConnected = true;
                     }
                 }
@@ -135,7 +158,7 @@ public class SocketManager {
                     @Override
                     public void run() {
                         isConnected = false;
-                        Toast.makeText(activity, "Disconnected from web server", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, Dictionary.DISCONNECTED_FROM_SERVER, Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -147,7 +170,7 @@ public class SocketManager {
             activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(activity, "Error connecting to web server", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, Dictionary.ERROR_CONNECTING, Toast.LENGTH_LONG).show();
                     }
                 });
             }

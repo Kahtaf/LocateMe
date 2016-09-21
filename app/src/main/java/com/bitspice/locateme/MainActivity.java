@@ -12,6 +12,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private EditText nameInput;
     private Switch locationSwitch;
+    private Button testButton;
     private SocketManager socketManager;
 
     @Override
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         locationSwitch = (Switch) findViewById(R.id.locationSwitch);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         socketManager = new SocketManager(((LocateMeApplication) getApplication()).getSocket(), this);
+        testButton = (Button) findViewById(R.id.testButton);
 
         if (getUsername() == null){ // Username not saved
             locationSwitch.setEnabled(false);
@@ -74,6 +78,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        testButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Perform action on click
+                socketManager.addUser("riley");
+            }
+        });
+
     }
 
     @Override
@@ -82,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startLocationUpdates();
             } else {
-                Toast.makeText(this, "Location permission denied.", Toast.LENGTH_SHORT);
+                Toast.makeText(this, Dictionary.LOCATION_PERMISSION_DENIED, Toast.LENGTH_SHORT);
                 locationSwitch.setChecked(false);
             }
         }
