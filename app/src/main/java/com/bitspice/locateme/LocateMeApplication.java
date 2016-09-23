@@ -15,7 +15,11 @@ public class LocateMeApplication extends Application {
     private Socket mSocket;
     {
         try {
-            mSocket = IO.socket(Constants.SERVER_URL);
+            IO.Options options = new IO.Options();
+            options.timeout = 20000;
+            options.forceNew = true;
+            options.port = 3000;
+            mSocket = IO.socket(Constants.SERVER_URL, options);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">LocateMe</string>
+    <string name="join">Join</string>
+    <string name="map_view">Map View</string>
+    <string name="enter_name">Enter Name</string>
+    <string name="user_joined">User joined: %1$s</string>
+    <string name="connected">Connected to web server</string>
+    <string name="disconnected">Disconnected from web server</string>
+    <string name="error_connecting">Error connecting to web server: %1$s </string>
+    <string name="location_denied">Location permission denied</string>
+    <string name="map_access_token" translatable="false">pk.eyJ1IjoidGV0ZWdvaiIsImEiOiJjaXRmN2hmd2UwOGVhMnhvOTl3cHlvNTBlIn0.5DNaWectSLwDttAkKrCoAg</string>
 </resources>

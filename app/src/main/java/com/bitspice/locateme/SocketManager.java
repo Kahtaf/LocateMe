@@ -1,9 +1,9 @@
 package com.bitspice.locateme;
 
 import android.app.Activity;
+import android.util.Log;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,6 +43,7 @@ public class SocketManager {
             socket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             socket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             socket.off(Constants.RECEIVE_LOCATION_UPDATE, receiveLocationUpdate);
+            socket.off(Constants.USER_JOINED, receiveUserJoinedUpdate);
         }
     }
 
@@ -70,8 +71,7 @@ public class SocketManager {
     }
 
     public void addUser(String username){
-        //Toast.makeText(activity, "sending", Toast.LENGTH_LONG).show();
-        socket.emit(Constants.ADD_USER,"riley");
+        socket.emit(Constants.ADD_USER, username);
     }
 
     /**
@@ -100,11 +100,14 @@ public class SocketManager {
                 public void run() {
                     try{
                         JSONObject data = (JSONObject) args[0];
-                        String un = data.opt("username").toString();
-                        String latitude = data.opt("latitude").toString();
-                        String longitude = data.opt("longitude").toString();
-                        String message = String.format(Dictionary.USER_POSITION_BROADCAST,un,latitude,longitude);
-                        Toast.makeText(activity,message,Toast.LENGTH_LONG).show();
+                        String username = data.optString("username", null).toString();
+                        double latitude = data.optDouble("latitude", 0);
+                        double longitude = data.optDouble("longitude", 0);
+                        Log.i("Socket Manager: ", String.format("%s has moved to (%f, %f)" , username, latitude, longitude));
+
+                        if (activity instanceof MapsActivity){
+                            ((MapsActivity) activity).updateUserLocation(username, latitude, longitude);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -121,10 +124,9 @@ public class SocketManager {
                 public void run() {
                     try {
                         JSONObject data = (JSONObject) args[0];
-                        String un = data.opt("username").toString();
-                        if(un!=null) {
-                            String userJoinedMessage = String.format(Dictionary.USER_JOINED, un);
-                            Toast.makeText(activity, userJoinedMessage, Toast.LENGTH_LONG).show();
+                        String username = data.optString("username", null);
+                        if(username != null) {
+                            Toast.makeText(activity, activity.getString(R.string.user_joined, username), Toast.LENGTH_LONG).show();
                         }
                     }catch(Exception e){
                         e.printStackTrace();
@@ -134,8 +136,6 @@ public class SocketManager {
         }
     };
 
-
-
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -143,7 +143,7 @@ public class SocketManager {
                 @Override
                 public void run() {
                     if (!isConnected) {
-                        Toast.makeText(activity, Dictionary.CONNECTED_TO_SERVER, Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, activity.getString(R.string.connected), Toast.LENGTH_LONG).show();
                         isConnected = true;
                     }
                 }
@@ -158,7 +158,7 @@ public class SocketManager {
                     @Override
                     public void run() {
                         isConnected = false;
-                        Toast.makeText(activity, Dictionary.DISCONNECTED_FROM_SERVER, Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, activity.getString(R.string.disconnected), Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -166,11 +166,12 @@ public class SocketManager {
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
-        public void call(Object... args) {
+        public void call(final Object... args) {
             activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(activity, Dictionary.ERROR_CONNECTING, Toast.LENGTH_LONG).show();
+                        String errorMsg = args[0].toString();
+                        Toast.makeText(activity, activity.getString(R.string.error_connecting, errorMsg), Toast.LENGTH_LONG).show();
                     }
                 });
             }
