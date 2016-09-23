@@ -18,6 +18,7 @@ public class StartActivity extends AppCompatActivity {
     private static final int PERMISSION_LOCATION_REQUEST_CODE = 1;
 
     private EditText nameInput;
+    private EditText serverInput;
     private Button startButton;
 
     @Override
@@ -26,7 +27,15 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         nameInput = (EditText) findViewById(R.id.name);
-        startButton = (Button) findViewById(R.id.testButton);
+        serverInput = (EditText) findViewById(R.id.server_url);
+        startButton = (Button) findViewById(R.id.join_button);
+
+        if (Utils.getServerURL(this) == null){ // Server URL not saved
+            startButton.setEnabled(false);
+        } else {
+            serverInput.setText(Utils.getServerURL(this));
+            startButton.setEnabled(true);
+        }
 
         if (Utils.getUsername(this) == null){ // Username not saved
             startButton.setEnabled(false);
@@ -49,6 +58,24 @@ public class StartActivity extends AppCompatActivity {
                 } else {
                     startButton.setEnabled(true);
                     Utils.saveUsername(StartActivity.this, s.toString());
+                }
+            }
+        });
+
+        serverInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() == 0){
+                    startButton.setEnabled(false);
+                } else {
+                    startButton.setEnabled(true);
+                    Utils.saveServerURL(StartActivity.this, s.toString());
                 }
             }
         });

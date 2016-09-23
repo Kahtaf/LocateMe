@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.MapboxAccountManager;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -23,7 +24,11 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 
+import java.net.URISyntaxException;
 import java.util.HashMap;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
 
 /**
  * Created by Kahtaf on 9/22/2016.
@@ -38,6 +43,7 @@ public class MapsActivity extends AppCompatActivity {
 
     private LocationManager locationManager;
     private SocketManager socketManager;
+    private Socket socket;
     private HashMap<String, Marker> markerMap;
 
     @Override
@@ -50,7 +56,14 @@ public class MapsActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        socketManager = new SocketManager(((LocateMeApplication) getApplication()).getSocket(), this);
+        try {
+            socket = IO.socket(Utils.getServerURL(this));
+        } catch (URISyntaxException e) {
+            Toast.makeText(this, getString(R.string.invalid_server), Toast.LENGTH_SHORT);
+            finish();
+        }
+        socketManager = new SocketManager(socket, this);
+
         username = Utils.getUsername(this);
         markerMap = new HashMap<>();
 

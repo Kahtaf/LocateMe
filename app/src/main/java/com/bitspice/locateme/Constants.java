@@ -18,5 +18,6 @@ public class Constants {
 
     // App constants
     public static final String SAVED_USER_NAME = "SAVED_USER_NAME";
+    public static final String SAVED_SERVER_URL = "SAVED_SERVER_URL";
     public static final int MAP_ZOOM = 14;
 }
